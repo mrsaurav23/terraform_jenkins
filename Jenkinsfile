@@ -24,21 +24,10 @@ pipeline {
                 sh 'pwd; cd terraform/ ; terraform show -no-color tfplan > tfplan.txt'
             }
         }
-        stage('Approval') {
-            when {
-                not {
-                    equals expected: true, actual: params.autoApprove
-                }
-            }
-            steps {
-                script {
-                    def plan = readFile 'terraform/tfplan.txt'
-                    input message: "Do you want to apply the plan?",
-                    parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
-                }
-            }
-        }
         stage('Apply') {
+            when {
+                expression { params.autoApprove }
+            }
             steps {
                 sh 'pwd; cd terraform/ ; terraform apply -input=false tfplan'
             }
